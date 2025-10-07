@@ -13,9 +13,9 @@ router.get("/", (req, res) => {
 
 // --- POST Data (untuk ESP32) ---
 router.post("/", (req, res) => {
-  const { temperature, humidity, status } = req.body;
+  const { temperature, humidity, status, alert } = req.body;
 
-  if (!temperature || !humidity || !status) {
+  if (!temperature || !humidity || !status || !alert) {
     return res.status(400).json({ message: "Invalid data" });
   }
 
