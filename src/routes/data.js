@@ -1,27 +1,36 @@
 import express from "express";
-import db from "../db.js"; // sesuaikan dengan lokasi file koneksi database kamu
+import { db } from "../db.js";
 
 const router = express.Router();
 
-// GET endpoint - ambil 50 data terakhir
+// --- GET Data (untuk Dashboard / Frontend) ---
 router.get("/", (req, res) => {
   db.query("SELECT * FROM sensor_data ORDER BY id DESC LIMIT 50", (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) return res.status(500).json({ error: err });
     res.json(results);
   });
 });
 
-// POST endpoint - terima data dari IoT
+// --- POST Data (untuk ESP32) ---
 router.post("/", (req, res) => {
   const { temperature, humidity, status } = req.body;
 
-  console.log("Data diterima:", req.body);
+  if (!temperature || !humidity || !status) {
+    return res.status(400).json({ message: "Invalid data" });
+  }
 
-  // bisa tambahkan logika INSERT ke DB di sini
-  res.json({
-    message: "Data received successfully",
-    data: { temperature, humidity, status },
-  });
+  db.query(
+    "INSERT INTO sensor_data (temperature, humidity, status) VALUES (?, ?, ?)",
+    [temperature, humidity, status],
+    (err) => {
+      if (err) return res.status(500).json({ error: err });
+      console.log("✅ Data received:", req.body);
+      res.json({
+        message: "Data received successfully",
+        data: { temperature, humidity, status },
+      });
+    }
+  );
 });
 
 export default router;
