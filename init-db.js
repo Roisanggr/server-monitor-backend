@@ -1,7 +1,7 @@
 import { db } from "./db.js";
 
 db.query(`
-  CREATE TABLE IF NOT EXISTS sensor_data (
+  CREATE TABLE IF NOT EXISTS data_sensor (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     temperature FLOAT,
     humidity FLOAT,
