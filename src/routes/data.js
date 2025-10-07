@@ -5,7 +5,7 @@ const router = express.Router();
 
 // GET semua data
 router.get("/", (req, res) => {
-  db.query("SELECT * FROM sensor_data ORDER BY id DESC LIMIT 50", (err, results) => {
+  db.query("SELECT * FROM data_sensor ORDER BY id DESC LIMIT 50", (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(results);
   });
@@ -14,7 +14,7 @@ router.get("/", (req, res) => {
 // POST data baru
 router.post("/", (req, res) => {
   const { temperature, humidity, status, alert } = req.body;
-  const query = "INSERT INTO sensor_data (temperature, humidity, status, alert) VALUES (?, ?, ?, ?)";
+  const query = "INSERT INTO data_sensor (temperature, humidity, status, alert) VALUES (?, ?, ?, ?)";
   db.query(query, [temperature, humidity, status, alert], (err, result) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ message: "✅ Data inserted successfully", id: result.insertId });
