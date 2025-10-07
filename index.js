@@ -1,35 +1,28 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
-import dataRoutes from "./src/routes/data.js";
-
-dotenv.config();
+import bodyParser from "body-parser";
+import dataRoutes from "./routes/data.js";
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
-// Health check endpoint
-app.get("/health", (req, res) => {
-  res.json({ status: "OK", timestamp: new Date() });
+app.use(cors());
+app.use(bodyParser.json());
+
+// tes server
+app.get("/", (req, res) => {
+  res.send("Server Monitor Backend is running 🚀");
 });
 
-// 404 handler
+// gunakan prefix /api untuk semua route
+app.use("/api/data", dataRoutes);
+
+// handle route tidak ditemukan
 app.use((req, res) => {
-  res.status(404).json({ 
+  res.status(404).json({
     message: "Route not found",
-    path: req.path 
+    path: req.path,
   });
 });
 
-// Route utama
-app.use("/api/data", dataRoutes);
-
-app.get("/", (req, res) => {
-  res.send("Server Monitor Backend is Running 🚀");
-});
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Backend running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
