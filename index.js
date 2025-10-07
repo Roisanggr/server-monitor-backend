@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 // --- MySQL Connection (FIXED) ---
 const db = mysql.createConnection({
-  host: process.env.MYSQLHOST || "viaduct.proxy.rlwy.net", // Host dari Railway
+  host: process.env.MYSQLHOST || "mysql://root:oAHzlcBlhJnBkfmjLHrpNnWtopWunqRX@centerbeam.proxy.rlwy.net:32261/railway", // Host dari Railway
   user: process.env.MYSQLUSER || "root",
   password: process.env.MYSQLPASSWORD || "oAHzlcBlhJnBkfmjLHrpNnWtopWunqRX",
   database: process.env.MYSQLDATABASE || "railway",
