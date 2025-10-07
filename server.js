@@ -1,76 +1,47 @@
 const express = require('express');
-const mysql = require('mysql2/promise');
+const cors = require('cors');
+const mqtt = require('mqtt');
+require('dotenv').config();
+
+const { testConnection } = require('./config/db');
+const routes = require('./routes');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
-
-// Railway menyediakan PORT otomatis
 const PORT = process.env.PORT || 3000;
 
-// Middleware untuk parse JSON
+// Middleware
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Buat pool koneksi menggunakan env vars dari Railway
-const pool = mysql.createPool({
-  host: process.env.MYSQLHOST,
-  port: process.env.MYSQLPORT,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+// MQTT Connection
+const mqttClient = mqtt.connect('mqtt://broker.emqx.io', {
+  username: process.env.MQTT_USERNAME,
+  password: process.env.MQTT_PASSWORD,
+  clientId: `backend_${Math.random().toString(16).slice(3)}`
 });
 
-// POST: Simpan data sensor
-app.post('/api/sensor', async (req, res) => {
-  const { temperature, humidity, status, alert } = req.body;
-
-  // Validasi sederhana
-  if (
-    typeof temperature !== 'number' ||
-    typeof humidity !== 'number' ||
-    typeof status !== 'string' ||
-    typeof alert !== 'boolean'
-  ) {
-    return res.status(400).json({ error: 'Invalid input. Required: temperature (number), humidity (number), status (string), alert (boolean)' });
-  }
-
-  try {
-    const [result] = await pool.execute(
-      `INSERT INTO sensor_data (temperature, humidity, status, alert) VALUES (?, ?, ?, ?)`,
-      [temperature, humidity, status, alert]
-    );
-
-    res.status(201).json({
-      success: true,
-      id: result.insertId,
-      message: 'Data saved successfully'
-    });
-  } catch (err) {
-    console.error('Database error:', err);
-    res.status(500).json({ error: 'Failed to save data', details: err.message });
-  }
+mqttClient.on('connect', () => {
+  console.log('✅ MQTT Connected');
 });
 
-// GET: Ambil data terbaru (opsional, untuk debugging)
-app.get('/api/sensor', async (req, res) => {
-  try {
-    const [rows] = await pool.execute(
-      `SELECT * FROM sensor_data ORDER BY timestamp DESC LIMIT 10`
-    );
-    res.json(rows);
-  } catch (err) {
-    console.error('Fetch error:', err);
-    res.status(500).json({ error: 'Failed to fetch data' });
-  }
+mqttClient.on('error', (err) => {
+  console.error('❌ MQTT Error:', err);
 });
 
-// Health check
-app.get('/', (req, res) => {
-  res.json({ status: 'OK', message: 'Sensor backend is running on Railway!' });
-});
+// Make mqttClient available globally
+app.set('mqttClient', mqttClient);
 
-// Jalankan server
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+// Routes
+app.use('/', routes);
+
+// Error handling
+app.use(errorHandler);
+
+// Start server
+app.listen(PORT, async () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  await testConnection();
+  console.log(`📡 Environment: ${process.env.NODE_ENV}`);
 });
