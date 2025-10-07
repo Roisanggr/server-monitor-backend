@@ -12,8 +12,8 @@ export const db = mysql.createConnection({
 
 db.connect((err) => {
   if (err) {
-    console.error("❌ Database connection failed:", err);
+    console.error("❌ Databasee connection failed:", err);
   } else {
-    console.log("✅ Connected to MySQL Database");
+    console.log("✅ Connectedd to MySQL Database");
   }
 });
