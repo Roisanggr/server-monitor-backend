@@ -56,4 +56,13 @@ app.get("/api/data", (req, res) => {
   });
 });
 
+app.post("/api/data", (req, res) => {
+  const { temperature, humidity, status } = req.body;
+  console.log("Data received:", req.body);
+  res.json({
+    message: "Data received successfully",
+    data: { temperature, humidity, status },
+  });
+});
+
 app.listen(3000, () => console.log("Backend running on port 3000"));
