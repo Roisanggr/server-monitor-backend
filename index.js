@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { db } from "./db.js";
 import dataRoute from "./src/routes/data.js";
+import "./init-db.js"; 
 
 dotenv.config();
 const app = express();
