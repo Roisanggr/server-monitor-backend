@@ -9,6 +9,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({ status: "OK", timestamp: new Date() });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ 
+    message: "Route not found",
+    path: req.path 
+  });
+});
+
 // Route utama
 app.use("/api/data", dataRoutes);
 
